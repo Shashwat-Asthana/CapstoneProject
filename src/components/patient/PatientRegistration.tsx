@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { BloodType } from '@/lib/types';
-import { addPatient } from '@/lib/database';
+import { BloodType, UrgencyLevel, User } from '@/lib/types';
+import { createUser, createPatient, getUserByEmail } from '@/lib/api';
 import { setAuthUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,28 +63,63 @@ const PatientRegistration = () => {
     setIsSubmitting(true);
     
     try {
-      // Create patient object
-      const patient = {
-        ...values,
-        role: 'patient' as const,
-        requestedDate: new Date(),
-        requestStatus: 'pending' as const,
-      };
+      // Check if user exists
+      const existingUser = await getUserByEmail(values.email);
+      if (existingUser) {
+        toast({
+          title: "Registration Failed",
+          description: "A user with this email already exists.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
-      // Add patient to database
-      const newPatient = addPatient(patient);
+      // Create user
+      const user = await createUser(
+        values.email,
+        values.name,
+        values.phone,
+        values.city,
+        'patient'
+      );
       
-      // Set authentication
-      setAuthUser(newPatient);
-      
-      // Show success toast
-      toast({
-        title: 'Registration successful',
-        description: 'Your request for blood has been registered.',
-      });
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
+      if (user) {
+        // Create patient
+        const patient = await createPatient(user.id, values.bloodType, values.urgency);
+        
+        if (patient) {
+          // Set authentication
+          setAuthUser(user);
+          
+          // Show success toast
+          toast({
+            title: 'Registration successful',
+            description: 'Your request for blood has been registered.',
+          });
+          
+          // Redirect to find donors
+          navigate('/find-donors', { 
+            state: { 
+              bloodType: values.bloodType, 
+              city: values.city,
+              patientId: patient.id
+            } 
+          });
+        } else {
+          toast({
+            title: 'Registration failed',
+            description: 'There was an error registering your request.',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        toast({
+          title: 'Registration failed',
+          description: 'There was an error creating your account.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
       console.error('Registration error:', error);
       toast({
