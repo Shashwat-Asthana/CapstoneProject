@@ -236,7 +236,7 @@ export const getAllDonors = async (): Promise<Donor[]> => {
   const { data, error } = await supabase
     .from('donors')
     .select('*, users!inner(*)')
-    .order('created_at', { ascending: false });
+    .order('users.created_at', { ascending: false });
   
   if (error) {
     console.error('Error getting all donors:', error);
@@ -250,7 +250,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
   const { data, error } = await supabase
     .from('patients')
     .select('*, users!inner(*)')
-    .order('created_at', { ascending: false });
+    .order('users.created_at', { ascending: false });
   
   if (error) {
     console.error('Error getting all patients:', error);
