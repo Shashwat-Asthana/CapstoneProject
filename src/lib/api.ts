@@ -7,7 +7,8 @@ import {
   Patient, 
   User, 
   UserRole,
-  UrgencyLevel
+  UrgencyLevel,
+  RequestStatus
 } from "./types";
 
 // User functions
@@ -72,7 +73,7 @@ export const createDonor = async (
     return null;
   }
   
-  return data;
+  return data as Donor;
 };
 
 export const getDonorById = async (id: string): Promise<Donor | null> => {
@@ -87,7 +88,7 @@ export const getDonorById = async (id: string): Promise<Donor | null> => {
     return null;
   }
   
-  return data;
+  return data as Donor;
 };
 
 export const getAvailableDonorsByBloodTypeAndCity = async (
@@ -106,7 +107,7 @@ export const getAvailableDonorsByBloodTypeAndCity = async (
     return [];
   }
   
-  return data || [];
+  return data as Donor[];
 };
 
 export const updateDonorAvailability = async (donorId: string, isAvailable: boolean): Promise<boolean> => {
@@ -147,7 +148,7 @@ export const createPatient = async (
     return null;
   }
   
-  return data;
+  return data as Patient;
 };
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
@@ -162,7 +163,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
     return null;
   }
   
-  return data;
+  return data as Patient;
 };
 
 export const updatePatientStatus = async (
@@ -207,7 +208,7 @@ export const createMatch = async (
   // Update patient request status
   await updatePatientStatus(patientId, 'matched');
   
-  return data;
+  return data as DonationMatch;
 };
 
 export const getAllMatches = async (): Promise<DonationMatch[]> => {
@@ -227,7 +228,7 @@ export const getAllMatches = async (): Promise<DonationMatch[]> => {
     return [];
   }
   
-  return data || [];
+  return data as DonationMatch[];
 };
 
 // Admin functions
@@ -242,7 +243,7 @@ export const getAllDonors = async (): Promise<Donor[]> => {
     return [];
   }
   
-  return data || [];
+  return data as Donor[];
 };
 
 export const getAllPatients = async (): Promise<Patient[]> => {
@@ -256,7 +257,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     return [];
   }
   
-  return data || [];
+  return data as Patient[];
 };
 
 // Admin authentication

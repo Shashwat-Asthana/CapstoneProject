@@ -281,10 +281,10 @@ const AdminDashboard = () => {
                         ) : (
                           donors.map((donor) => (
                             <TableRow key={donor.id}>
-                              <TableCell>{donor.users.name}</TableCell>
-                              <TableCell>{donor.users.email}</TableCell>
-                              <TableCell>{donor.users.phone}</TableCell>
-                              <TableCell>{donor.users.city}</TableCell>
+                              <TableCell>{donor.users?.name}</TableCell>
+                              <TableCell>{donor.users?.email}</TableCell>
+                              <TableCell>{donor.users?.phone}</TableCell>
+                              <TableCell>{donor.users?.city}</TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="font-semibold">
                                   {donor.blood_type}
@@ -347,10 +347,10 @@ const AdminDashboard = () => {
                         ) : (
                           patients.map((patient) => (
                             <TableRow key={patient.id}>
-                              <TableCell>{patient.users.name}</TableCell>
-                              <TableCell>{patient.users.email}</TableCell>
-                              <TableCell>{patient.users.phone}</TableCell>
-                              <TableCell>{patient.users.city}</TableCell>
+                              <TableCell>{patient.users?.name}</TableCell>
+                              <TableCell>{patient.users?.email}</TableCell>
+                              <TableCell>{patient.users?.phone}</TableCell>
+                              <TableCell>{patient.users?.city}</TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="font-semibold">
                                   {patient.blood_type}

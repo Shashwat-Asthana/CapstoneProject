@@ -170,8 +170,8 @@ const FindDonors = () => {
                     <CardHeader className="bg-muted/50">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle>{user.name}</CardTitle>
-                          <CardDescription>Donor since {new Date(user.created_at).toLocaleDateString()}</CardDescription>
+                          <CardTitle>{user?.name}</CardTitle>
+                          <CardDescription>Donor since {new Date(user?.created_at || '').toLocaleDateString()}</CardDescription>
                         </div>
                         <div className="text-lg font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
                           {donor.blood_type}
@@ -182,12 +182,12 @@ const FindDonors = () => {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <MapPin size={16} />
-                          <span>{user.city}</span>
+                          <span>{user?.city}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Phone size={16} />
                           {showPhone[donor.id] ? (
-                            <span>{user.phone}</span>
+                            <span>{user?.phone}</span>
                           ) : (
                             <Button 
                               variant="ghost" 
@@ -201,7 +201,7 @@ const FindDonors = () => {
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Mail size={16} />
                           {showEmail[donor.id] ? (
-                            <span>{user.email}</span>
+                            <span>{user?.email}</span>
                           ) : (
                             <Button 
                               variant="ghost" 
@@ -245,7 +245,7 @@ const FindDonors = () => {
                             </div>
                             <div className="flex items-center gap-2 mb-2">
                               <CheckCircle2 className="text-green-500" size={20} />
-                              <span>Location: <strong>{user.city}</strong></span>
+                              <span>Location: <strong>{user?.city}</strong></span>
                             </div>
                             <p className="text-yellow-600 text-sm mt-4">
                               Note: Once matched, this donor will be unavailable for 6 months following donation.
