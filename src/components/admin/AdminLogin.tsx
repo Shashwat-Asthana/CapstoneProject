@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { checkAdminCredentials } from '@/lib/database';
-import { setAdminAuth } from '@/lib/auth';
+import { checkAdminCredentials } from '@/lib/api'; // Changed from database to api
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -45,8 +44,8 @@ const AdminLogin = () => {
       const isAdmin = checkAdminCredentials(values.password);
       
       if (isAdmin) {
-        // Set admin authentication
-        setAdminAuth();
+        // Set admin authentication - using localStorage instead of unavailable setAdminAuth
+        localStorage.setItem('admin_auth', 'true');
         
         // Show success toast
         toast({
