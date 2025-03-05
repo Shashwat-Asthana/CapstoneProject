@@ -233,10 +233,11 @@ export const getAllMatches = async (): Promise<DonationMatch[]> => {
 
 // Admin functions
 export const getAllDonors = async (): Promise<Donor[]> => {
+  // Fixed the ordering syntax here
   const { data, error } = await supabase
     .from('donors')
     .select('*, users!inner(*)')
-    .order('users.created_at', { ascending: false });
+    .order('created_at', { ascending: false });
   
   if (error) {
     console.error('Error getting all donors:', error);
@@ -247,10 +248,11 @@ export const getAllDonors = async (): Promise<Donor[]> => {
 };
 
 export const getAllPatients = async (): Promise<Patient[]> => {
+  // Fixed the ordering syntax here
   const { data, error } = await supabase
     .from('patients')
     .select('*, users!inner(*)')
-    .order('users.created_at', { ascending: false });
+    .order('created_at', { ascending: false });
   
   if (error) {
     console.error('Error getting all patients:', error);
