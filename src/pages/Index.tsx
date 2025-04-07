@@ -15,7 +15,7 @@ const Index = () => {
               <Droplet size={64} className="text-primary" />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">
-              Blood<span className="text-primary">Life</span>
+              Blood-Testing 1<span className="text-primary">Life</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto">
               Connect blood donors with patients in need. Your donation can save a life.

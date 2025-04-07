@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+    environment {
+        VERCEL_HOOK = credentials('vercel-deploy-hook')
+        CI = 'true'  // Important for React test behavior
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        
+        // New Testing Stage
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run Jest tests (default for React)
+                    sh 'npm test -- --watchAll=false --coverage'
+                    
+                    // Optional: Run ESLint
+                    sh 'npm run lint'
+                    
+                    // Optional: Fail pipeline if tests don't pass
+                    // (npm test will already fail if tests fail)
+                }
+            }
+            post {
+                always {
+                    // Archive test results (JUnit format)
+                    junit 'junit.xml'  // If configured in Jest
+                    
+                    // Publish coverage report
+                    publishHTML target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'coverage/lcov-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Coverage Report'
+                    ]
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        
+        stage('Trigger Vercel Deploy') {
+            steps {
+                script {
+                    sh "curl -X POST '$VERCEL_HOOK'"
+                    echo 'Vercel deployment triggered!'
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline succeeded! Vercel will now deploy.'
+        }
+        failure {
+            echo 'Pipeline failed. Check test results or build logs.'
+        }
+    }
+}
