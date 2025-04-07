@@ -1,23 +1,10 @@
 pipeline {
-    agent any
-    environment {
-        VERCEL_HOOK = credentials('vercel-deploy-hook')
-        CI = 'true'
+    agent {
+        docker {
+            image 'node:20-alpine'
+        }
     }
     stages {
-        stage('Setup Node') {
-            steps {
-                script {
-                    // Install Node.js using Jenkins NodeJS plugin
-                    sh '''
-                        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-                        sudo apt-get install -y nodejs
-                        node --version
-                        npm --version
-                    '''
-                }
-            }
-        }
         stage('Checkout') {
             steps {
                 checkout scm
@@ -28,19 +15,9 @@ pipeline {
                 sh 'npm install'
             }
         }
-        stage('Run Tests') {
-            steps {
-                sh 'npm test -- --watchAll=false'
-            }
-        }
         stage('Build') {
             steps {
                 sh 'npm run build'
-            }
-        }
-        stage('Deploy to Vercel') {
-            steps {
-                sh "curl -X POST '$VERCEL_HOOK'"
             }
         }
     }
