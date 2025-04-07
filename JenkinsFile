@@ -1,91 +1,52 @@
 pipeline {
     agent any
-    tools {
-        nodejs 'Node18'  // Uses the NodeJS tool you configured in Jenkins
-    }
     environment {
         VERCEL_HOOK = credentials('vercel-deploy-hook')
-        CI = 'true'  // Required for React test behavior in CI
+        CI = 'true'
     }
     stages {
-        /* Stage 1: Checkout Code */
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        /* Stage 2: Install Dependencies */
+        
+        stage('Setup Node') {
+            steps {
+                script {
+                    // Install Node.js manually
+                    sh '''
+                        curl -sL https://deb.nodesource.com/setup_20.x | bash -
+                        apt-get install -y nodejs
+                        node --version
+                        npm --version
+                    '''
+                }
+            }
+        }
+        
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
-                sh 'npm install -g vercel@latest'  // Global Vercel CLI
             }
         }
-
-        /* Stage 3: Run Tests */
+        
         stage('Run Tests') {
             steps {
-                script {
-                    // Run tests with coverage
-                    sh 'npm test -- --watchAll=false --coverage'
-                    
-                    // Optional linting (uncomment if you have ESLint)
-                    // sh 'npm run lint'
-                }
-            }
-            post {
-                always {
-                    // Publish JUnit test results (if jest-junit configured)
-                    junit 'junit.xml' 
-                    
-                    // Publish coverage report
-                    publishHTML target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ]
-                }
+                sh 'npm test -- --watchAll=false'
             }
         }
-
-        /* Stage 4: Build Production Bundle */
+        
         stage('Build') {
             steps {
                 sh 'npm run build'
-                archiveArtifacts artifacts: 'build/**/*', fingerprint: true
             }
         }
-
-        /* Stage 5: Deploy to Vercel */
+        
         stage('Deploy to Vercel') {
             steps {
-                script {
-                    // Option 1: Use deploy hook (simplest)
-                    sh "curl -X POST '$VERCEL_HOOK'"
-                    
-                    // Option 2: Use Vercel CLI (more control - uncomment if needed)
-                    // sh 'vercel --prod --token $VERCEL_TOKEN --confirm'
-                    
-                    echo '🚀 Deployment triggered! Check Vercel dashboard.'
-                }
+                sh "curl -X POST '$VERCEL_HOOK'"
             }
-        }
-    }
-    post {
-        success {
-            echo '✅ Pipeline succeeded! Project deployed to Vercel.'
-            // Optional: Add Slack/email notification here
-        }
-        failure {
-            echo '❌ Pipeline failed! Check logs above.'
-            // Optional: Add failure notification
-        }
-        always {
-            cleanWs()  // Clean up workspace
         }
     }
 }
