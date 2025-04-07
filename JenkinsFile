@@ -4,7 +4,7 @@ pipeline {
         nodejs 'NodeJS-20'
     }
     environment {
-        VERCEL_HOOK = credentials('vercel-deploy-hook')
+        VERCEL_HOOK = credentials('vercel-deploy-hook-main')
     }
     stages {
         stage('Checkout') {
