@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    tools {
+        nodejs 'NodeJS-20'
+    }
+    environment {
+        VERCEL_HOOK = credentials('vercel-deploy-hook')
+    }
     
     stages {
         stage('Checkout') {
@@ -63,9 +69,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'vercel-deploy-hook', variable: 'VERCEL_HOOK']) {
-                        sh 'curl -X POST "$VERCEL_HOOK"'
-                    }
+                    echo 'Triggering Vercel deployment...'
+                    sh 'curl -s -X POST "$VERCEL_HOOK"'
                 }
             }
         }
