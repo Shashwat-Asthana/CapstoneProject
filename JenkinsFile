@@ -14,8 +14,6 @@ pipeline {
         stage('Install') {
             steps {
                 sh 'npm install'
-                // Install coverage support if needed
-                sh 'npm list @vitest/coverage-v8 || npm install -D @vitest/coverage-v8'
             }
         }
 
