@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:20-alpine'  // Lightweight Node.js image
+            args '-u root'  // Run as root to avoid permission issues
+        }
+    }
     environment {
         VERCEL_HOOK = credentials('vercel-deploy-hook')
         CI = 'true'
@@ -8,20 +13,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-        
-        stage('Setup Node') {
-            steps {
-                script {
-                    // Install Node.js manually
-                    sh '''
-                        curl -sL https://deb.nodesource.com/setup_20.x | bash -
-                        apt-get install -y nodejs
-                        node --version
-                        npm --version
-                    '''
-                }
             }
         }
         
