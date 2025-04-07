@@ -1,24 +1,5 @@
 {
     "version": 2,
-    "public": true,
-    "github": {
-      "enabled": true,
-      "silent": true
-    },
-    "rewrites": [
-      {
-        "source": "/(.*)",
-        "destination": "/index.html"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/static/(.*)",
-        "headers": {
-          "Cache-Control": "public, max-age=31536000, immutable"
-        }
-      }
-    ],
     "builds": [
       {
         "src": "package.json",
@@ -27,5 +8,9 @@
           "distDir": "dist"
         }
       }
-    ]
+    ],
+    "github": {
+      "enabled": true
+    }
   }
+  
