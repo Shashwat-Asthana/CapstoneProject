@@ -1,45 +1,30 @@
 pipeline {
     agent any
     tools {
-        nodejs 'NodeJS-20'  // Uses Node.js 20.x configured in Jenkins
+        nodejs 'NodeJS-20'
     }
     environment {
-        VERCEL_HOOK = credentials('vercel-deploy-hook')  // Securely stored in Jenkins credentials
-        NODE_ENV = 'production'
-    }
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))  // Keep only last 5 builds
-        timeout(time: 20, unit: 'MINUTES')  // Fail if stuck
-        
+        VERCEL_HOOK = credentials('vercel-deploy-hook')
     }
     stages {
-        // Stage 1: Checkout code
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        // Stage 2: Install dependencies
         stage('Install') {
             steps {
-                sh 'npm ci --prefer-offline'  // Clean install (faster & more reliable than npm install)
+                sh 'npm install'
             }
         }
 
-        // Stage 3: Build project
         stage('Build') {
             steps {
                 sh 'npm run build'
             }
-            post {
-                success {
-                    archiveArtifacts 'dist/**'  // Save build output
-                }
-            }
         }
 
-        // Stage 4: Run tests (conditional)
         stage('Test') {
             when {
                 expression {
@@ -49,55 +34,26 @@ pipeline {
             steps {
                 sh 'npm test'
             }
-            post {
-                always {
-                    junit '**/test-results.xml'  // Publish test reports
-                }
-            }
         }
 
-        // Stage 5: Deploy to Vercel
         stage('Deploy') {
             when {
-                branch 'main'  // Only deploy from main branch
+                branch 'main'
             }
             steps {
                 script {
-                    echo '🚀 Triggering Vercel deployment...'
-                    // Securely triggers deployment without exposing URL
-                    sh '''
-                        curl -s -X POST "$VERCEL_HOOK" \
-                        -H "Content-Type: application/json" \
-                        -d '{"teamId":"YOUR_TEAM_ID"}' \
-                        | jq -r '.url' > deployment-url.txt
-                    '''
-                    
-                    // Store deployment URL as artifact
-                    archiveArtifacts 'deployment-url.txt'
-                    
-                    // Get deployment status (optional)
-                    def deployUrl = readFile('deployment-url.txt').trim()
-                    echo "Deployment URL: ${deployUrl}"
+                    echo 'Triggering Vercel deployment...'
+                    sh 'curl -s -X POST "$VERCEL_HOOK"'
                 }
             }
         }
     }
     post {
         success {
-            echo '✅ Pipeline succeeded! Production deployment complete.'
-            // Uncomment for Slack notifications:
-            // slackSend channel: '#deployments', 
-            //     message: "Success: ${env.JOB_NAME} #${env.BUILD_NUMBER} deployed to ${deployUrl}"
+            echo '✅ Pipeline succeeded!'
         }
         failure {
-            echo '❌ Pipeline failed! Check logs for details.'
-            // Uncomment for email alerts:
-            // mail to: 'devops@example.com',
-            //     subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            //     body: "Check build: ${env.BUILD_URL}"
-        }
-        always {
-            cleanWs()  // Clean workspace
+            echo '❌ Pipeline failed!'
         }
     }
 }
