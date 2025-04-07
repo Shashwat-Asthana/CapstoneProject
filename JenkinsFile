@@ -1,40 +1,43 @@
 pipeline {
     agent any
+    tools {
+        nodejs 'Node18'  // Uses the NodeJS tool you configured in Jenkins
+    }
     environment {
         VERCEL_HOOK = credentials('vercel-deploy-hook')
-        CI = 'true'  // Important for React test behavior
+        CI = 'true'  // Required for React test behavior in CI
     }
     stages {
+        /* Stage 1: Checkout Code */
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
+        /* Stage 2: Install Dependencies */
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
+                sh 'npm install -g vercel@latest'  // Global Vercel CLI
             }
         }
-        
-        // New Testing Stage
+
+        /* Stage 3: Run Tests */
         stage('Run Tests') {
             steps {
                 script {
-                    // Run Jest tests (default for React)
+                    // Run tests with coverage
                     sh 'npm test -- --watchAll=false --coverage'
                     
-                    // Optional: Run ESLint
-                    sh 'npm run lint'
-                    
-                    // Optional: Fail pipeline if tests don't pass
-                    // (npm test will already fail if tests fail)
+                    // Optional linting (uncomment if you have ESLint)
+                    // sh 'npm run lint'
                 }
             }
             post {
                 always {
-                    // Archive test results (JUnit format)
-                    junit 'junit.xml'  // If configured in Jest
+                    // Publish JUnit test results (if jest-junit configured)
+                    junit 'junit.xml' 
                     
                     // Publish coverage report
                     publishHTML target: [
@@ -48,28 +51,41 @@ pipeline {
                 }
             }
         }
-        
+
+        /* Stage 4: Build Production Bundle */
         stage('Build') {
             steps {
                 sh 'npm run build'
+                archiveArtifacts artifacts: 'build/**/*', fingerprint: true
             }
         }
-        
-        stage('Trigger Vercel Deploy') {
+
+        /* Stage 5: Deploy to Vercel */
+        stage('Deploy to Vercel') {
             steps {
                 script {
+                    // Option 1: Use deploy hook (simplest)
                     sh "curl -X POST '$VERCEL_HOOK'"
-                    echo 'Vercel deployment triggered!'
+                    
+                    // Option 2: Use Vercel CLI (more control - uncomment if needed)
+                    // sh 'vercel --prod --token $VERCEL_TOKEN --confirm'
+                    
+                    echo '🚀 Deployment triggered! Check Vercel dashboard.'
                 }
             }
         }
     }
     post {
         success {
-            echo 'Pipeline succeeded! Vercel will now deploy.'
+            echo '✅ Pipeline succeeded! Project deployed to Vercel.'
+            // Optional: Add Slack/email notification here
         }
         failure {
-            echo 'Pipeline failed. Check test results or build logs.'
+            echo '❌ Pipeline failed! Check logs above.'
+            // Optional: Add failure notification
+        }
+        always {
+            cleanWs()  // Clean up workspace
         }
     }
 }
